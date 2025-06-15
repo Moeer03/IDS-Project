@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from data_preprocessing import preprocess_data
+from sklearn.preprocessing import StandardScaler
 # Load data once
 data = pd.read_csv("WA_Fn-UseC_-HR-Employee-Attrition.csv")
 def main():

@@ -43,20 +43,24 @@ def process_user_input(age, income, overtime, years_company, department, jobrole
         'Department': [department],
         'JobRole': [jobrole]
     })
+
+    # One-hot encode
     user_input = pd.get_dummies(user_input)
 
-    # Add any missing dummy columns
+    # Add missing columns
     for col in feature_columns:
         if col not in user_input.columns:
             user_input[col] = 0
 
+    # Reorder to match training columns
     user_input = user_input[feature_columns]
 
-    # Scale numeric columns
+    # Scale numeric columns only
     numeric_cols = ['Age', 'MonthlyIncome', 'YearsAtCompany', 'OverTime']
     user_input[numeric_cols] = scaler.transform(user_input[numeric_cols])
 
     return user_input
+
 
 # Main app
 def main():

@@ -109,6 +109,6 @@ def show_conclusion():
     analysis could explore interventions to improve satisfaction and work-life 
     balance.
         """)
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Chart-bar-asc-inc-m9.svg/800px-Chart-bar-asc-inc-m9.svg.png",caption="Use analytics charts to understand employee turnover.")
+    st.image("https://chatgpt.com/c/684eb54f-ada8-800b-9e18-a7f39aa6689d")
 if __name__ == "__main__":
     main()

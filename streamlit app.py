@@ -61,38 +61,45 @@ def show_eda():
 def show_modeling():
     st.header("Predict Attrition")
     st.markdown("Enter employee details to predict attrition probability.")
+
     # Input widgets for features (example subset for brevity)
     age = st.number_input("Age", min_value=18, max_value=60, value=30)
-    overtime = st.selectbox("OverTime", ["No","Yes"])
-    income = st.number_input("Monthly Income", min_value=1000, max_value=20000,
-    value=5000)
-    years_company = st.number_input("Years at Company", min_value=0,
-    max_value=40, value=5)
+    overtime = st.selectbox("OverTime", ["No", "Yes"])
+    income = st.number_input("Monthly Income", min_value=1000, max_value=20000, value=5000)
+    years_company = st.number_input("Years at Company", min_value=0, max_value=40, value=5)
     dept = st.selectbox("Department", data['Department'].unique())
     job = st.selectbox("Job Role", data['JobRole'].unique())
+
     # Collect inputs into a DataFrame
-    input_df = pd.DataFrame({'Age':[age],
-    'MonthlyIncome':[income],
-    'DistanceFromHome':[0], # add all required features; simplified here
-    'TotalWorkingYears':[years_company],
-    'OverTime':[overtime],
-    'Department':[dept],
-    'JobRole':[job]
+    input_df = pd.DataFrame({
+        'Age': [age],
+        'MonthlyIncome': [income],
+        'DistanceFromHome': [0],  # Placeholder
+        'TotalWorkingYears': [years_company],
+        'OverTime': [overtime],
+        'Department': [dept],
+        'JobRole': [job]
     })
-    # Preprocess input (same way as training data)
+
+    # Preprocess the data
     X_train, X_test, y_train, y_test = preprocess_data(data)
+
+    # Train model (for demonstration; ideally you should load a pre-trained model)
     rf = RandomForestClassifier(n_estimators=100, random_state=42)
     rf.fit(X_train, y_train)
-    # NOTE: In practice, you would train offline and load model. Here we retrain for simplicity.
-    # Transform input_df with same dummy vars and scaling (simplified demonstration)
-    # ...
+
+    # Prediction happens only after button click
     if st.button("Predict Attrition"):
-        # This is a placeholder; actual code would encode and scale `input_df` like training data
-        # For demonstration, assume model input is prepared correctly
-        prediction = rf.predict([ [age, income, years_company] ])[0] # simplified
-        prob = rf.predict_proba([ [age, income, years_company] ])[0][1]
-    result = "Yes" if prediction==1 else "No"
-    st.write(f"Predicted Attrition: **{result}** (probability {prob:.2f})")
+        try:
+            # Simplified assumption for demonstration
+            prediction = rf.predict([[age, income, years_company]])[0]
+            prob = rf.predict_proba([[age, income, years_company]])[0][1]
+
+            result = "Yes" if prediction == 1 else "No"
+            st.write(f"Predicted Attrition: **{result}** (Probability: {prob:.2f})")
+        except Exception as e:
+            st.error(f"Error during prediction: {e}")
+
 def show_conclusion():
     st.header("Conclusion and Recommendations")
     st.markdown("""

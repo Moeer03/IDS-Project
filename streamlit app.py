@@ -131,34 +131,39 @@ def show_conclusion():
     st.image("https://chatgpt.com/c/684eb54f-ada8-800b-9e18-a7f39aa6689d")
 
 def preprocess_data(df):
+    # Make a copy to avoid modifying the original dataframe
+    df = df.copy()
+
     # Drop constant/uninformative columns
-    df = df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1)
-    
+    cols_to_drop = ['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18']
+    df.drop(columns=cols_to_drop, inplace=True, errors='ignore')
+
     # Encode binary features
     df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
     df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
     df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
-    
+
     # One-hot encode remaining categoricals
     df = pd.get_dummies(df, drop_first=True)
-    
+
     # Separate target and features
     y = df['Attrition']
     X = df.drop('Attrition', axis=1)
-    
+
     # Scale numeric features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
-    # ✅ Convert back to DataFrame with original column names
+
+    # Convert back to DataFrame with original column names
     X_scaled_df = pd.DataFrame(X_scaled, columns=X.columns)
-    
-    # ✅ Perform train-test split on DataFrame
+
+    # Perform train-test split
     X_train, X_test, y_train, y_test = train_test_split(
         X_scaled_df, y, test_size=0.2, random_state=42, stratify=y
     )
 
     return X_train, X_test, y_train, y_test, scaler
+
 
 
 

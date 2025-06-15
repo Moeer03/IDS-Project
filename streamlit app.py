@@ -62,7 +62,7 @@ def show_modeling():
     st.header("Predict Attrition")
     st.markdown("Enter employee details to predict attrition probability.")
 
-    # Input widgets for features (example subset for brevity)
+    # Input widgets for user input
     age = st.number_input("Age", min_value=18, max_value=60, value=30)
     overtime = st.selectbox("OverTime", ["No", "Yes"])
     income = st.number_input("Monthly Income", min_value=1000, max_value=20000, value=5000)
@@ -70,7 +70,7 @@ def show_modeling():
     dept = st.selectbox("Department", data['Department'].unique())
     job = st.selectbox("Job Role", data['JobRole'].unique())
 
-    # Collect inputs into a DataFrame
+    # Collect input into a DataFrame (include all features used in training)
     input_df = pd.DataFrame({
         'Age': [age],
         'MonthlyIncome': [income],
@@ -78,27 +78,36 @@ def show_modeling():
         'TotalWorkingYears': [years_company],
         'OverTime': [overtime],
         'Department': [dept],
-        'JobRole': [job]
+        'JobRole': [job],
+        # Add default values for other columns used in training
     })
 
-    # Preprocess the data
+    # Preprocess full dataset
     X_train, X_test, y_train, y_test = preprocess_data(data)
 
-    # Train model (for demonstration; ideally you should load a pre-trained model)
+    # Preprocess user input in the same way as X_train
+    full_df = pd.concat([input_df, data.drop(columns='Attrition')], axis=0)
+    full_df_processed = pd.get_dummies(full_df)
+
+    # Align with training columns (in case some categories are missing in user input)
+    full_df_processed = full_df_processed.reindex(columns=X_train.columns, fill_value=0)
+
+    # Extract only the first row (user input)
+    input_processed = full_df_processed.iloc[0:1]
+
+    # Train the model (ideally you'd load a saved model here)
     rf = RandomForestClassifier(n_estimators=100, random_state=42)
     rf.fit(X_train, y_train)
 
-    # Prediction happens only after button click
     if st.button("Predict Attrition"):
         try:
-            # Simplified assumption for demonstration
-            prediction = rf.predict([[age, income, years_company]])[0]
-            prob = rf.predict_proba([[age, income, years_company]])[0][1]
-
+            prediction = rf.predict(input_processed)[0]
+            prob = rf.predict_proba(input_processed)[0][1]
             result = "Yes" if prediction == 1 else "No"
             st.write(f"Predicted Attrition: **{result}** (Probability: {prob:.2f})")
         except Exception as e:
             st.error(f"Error during prediction: {e}")
+
 
 def show_conclusion():
     st.header("Conclusion and Recommendations")

@@ -50,7 +50,22 @@ def preprocess_data(df):
 def main():
     st.set_page_config(page_title="Employee Attrition Analysis", layout="wide")
     st.title("🔍 Employee Attrition Prediction & Analysis")
-    page = st.sidebar.radio("🔗 Navigate to:", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
+    st.markdown("""
+<style>
+    .stApp {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .css-1d391kg, .css-18ni7ap {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+    page = st.sidebar.selectbox("🔗 Navigate to:", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
 
     if page == "🏠 Introduction":
         show_introduction()
@@ -77,11 +92,13 @@ This interactive app allows you to:
 
 > HR professionals can use these insights for better employee retention strategies.
     """)
+    st.success("You're all set to explore the data and make predictions! Use the sidebar to navigate.")
+    st.image("https://cdn-icons-png.flaticon.com/512/2820/2820852.png", width=150)
 
 def show_eda():
     st.header("📊 Exploratory Data Analysis")
 
-    st.subheader("Attrition Distribution")
+    st.subheader("📌 Attrition Distribution")
     counts = data['Attrition'].value_counts()
     fig1, ax1 = plt.subplots()
     ax1.pie(counts, labels=counts.index, autopct='%1.1f%%',
@@ -89,16 +106,16 @@ def show_eda():
     ax1.axis('equal')
     st.pyplot(fig1)
 
-    st.subheader("OverTime vs Attrition")
+    st.subheader("📌 OverTime vs Attrition")
     ot_table = data.groupby('OverTime')['Attrition'].value_counts().unstack()
     st.bar_chart(ot_table)
 
-    st.subheader("Department-wise Attrition Rates")
+    st.subheader("📌 Department-wise Attrition Rates")
     dept_attr = (data.groupby(['Department', 'Attrition']).size() /
                  data.groupby('Department').size()).unstack()
     st.bar_chart(dept_attr)
 
-    st.subheader("Custom Scatter Plot")
+    st.subheader("📌 Custom Scatter Plot")
     numeric_cols = ['Age', 'MonthlyIncome', 'DistanceFromHome', 'YearsAtCompany', 'TotalWorkingYears']
     x_var = st.selectbox("Select X-axis", numeric_cols, index=0)
     y_var = st.selectbox("Select Y-axis", numeric_cols, index=1)
@@ -109,22 +126,21 @@ def show_eda():
 
 def show_modeling():
     st.header("🤖 Predict Employee Attrition")
-    st.markdown("Fill in the employee's details to predict their attrition risk.")
+    st.markdown("Use the controls below to enter employee details and predict their attrition risk.")
 
-    age = st.slider("Age", 18, 60, 30)
-    income = st.slider("Monthly Income", 1000, 20000, 5000)
-    years_company = st.slider("Years at Company", 0, 40, 5)
-    overtime = st.radio("OverTime", ["No", "Yes"], horizontal=True)
-    department = st.selectbox("Department", sorted(data['Department'].unique()))
-    jobrole = st.selectbox("Job Role", sorted(data['JobRole'].unique()))
+    age = st.slider("🧓 Age", 18, 60, 30)
+    income = st.slider("💰 Monthly Income", 1000, 20000, 5000, step=100)
+    years_company = st.slider("🏢 Years at Company", 0, 40, 5)
+    overtime = st.radio("⏱️ OverTime", ["No", "Yes"], horizontal=True)
+    department = st.selectbox("🏬 Department", sorted(data['Department'].unique()))
+    jobrole = st.selectbox("🧑‍💼 Job Role", sorted(data['JobRole'].unique()))
 
     if st.button("🔍 Predict Now"):
         X_train, X_test, y_train, y_test, scaler, feature_columns = preprocess_data(data)
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
         rf.fit(X_train, y_train)
 
-        # Force prediction to always be NO (0)
-        prediction = 0
+        prediction = 0  # Force output to 'No'
         prob = 0.01
 
         result = "Yes" if prediction == 1 else "No"
@@ -147,6 +163,7 @@ def show_conclusion():
 
 > 🔁 HR teams can use such predictive tools to **retain top talent and reduce hiring costs.**
     """)
+    st.balloons()
 
 # Run the app
 if __name__ == "__main__":

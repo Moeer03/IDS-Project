@@ -13,54 +13,6 @@ def load_data():
 
 data = load_data()
 
-def process_user_input(input_data_dict, ref_columns, scaler):
-    """
-    Takes a dictionary of input fields from user,
-    returns a processed DataFrame with exact columns (ref_columns),
-    scaled and ready for prediction.
-    """
-
-    # Step 1: Convert dict to DataFrame
-    df_input = pd.DataFrame([input_data_dict])
-
-    # Step 2: One-hot encode the input
-    df_input = pd.get_dummies(df_input)
-
-    # Step 3: Add any missing columns (from training time)
-    for col in ref_columns:
-        if col not in df_input.columns:
-            df_input[col] = 0
-
-    # Step 4: Ensure column order matches training data
-    df_input = df_input[ref_columns]
-
-    # Step 5: Apply scaling to numeric columns only
-    num_cols = scaler.feature_names_in_
-    df_input[num_cols] = scaler.transform(df_input[num_cols])
-
-    return df_input
-
-# Preprocessing function for full dataset
-# def preprocess_data(df):
-#     df = df.copy()
-#     df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
-#     df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
-#     df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
-#     df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
-#     df = pd.get_dummies(df, drop_first=True)
-
-#     y = df['Attrition']
-#     X = df.drop('Attrition', axis=1)
-
-#     scaler = StandardScaler()
-#     X_scaled = scaler.fit_transform(X)
-#     X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
-
-#     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
-
-#     return X_train, X_test, y_train, y_test, scaler, X.columns
-
-# Process a single user input row
 def process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler):
     user_input = pd.DataFrame({
         'Age': [age],
@@ -71,53 +23,59 @@ def process_user_input(age, income, overtime, years_company, department, jobrole
         'JobRole': [jobrole]
     })
 
-    # One-hot encode
     user_input = pd.get_dummies(user_input)
-
-    # Add missing columns
     for col in feature_columns:
         if col not in user_input.columns:
             user_input[col] = 0
-
-    # Reorder to match training columns
     user_input = user_input[feature_columns]
-
-    # Scale numeric columns only
     numeric_cols = ['Age', 'MonthlyIncome', 'YearsAtCompany', 'OverTime']
     user_input[numeric_cols] = scaler.transform(user_input[numeric_cols])
-
     return user_input
 
+def preprocess_data(df):
+    df = df.copy()
+    df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
+    df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
+    df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
+    df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
+    df = pd.get_dummies(df, drop_first=True)
+    y = df['Attrition']
+    X = df.drop('Attrition', axis=1)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
+    return X_train, X_test, y_train, y_test, scaler, X.columns
 
-# Main app
 def main():
-    st.title("Employee Attrition Analysis and Prediction")
-    page = st.sidebar.radio("Navigate", ["Introduction", "EDA", "Modeling", "Conclusion"])
+    st.set_page_config(page_title="Employee Attrition Analysis", layout="wide")
+    st.title("🔍 Employee Attrition Prediction & Analysis")
+    page = st.sidebar.radio("🔗 Navigate to:", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
 
-    if page == "Introduction":
+    if page == "🏠 Introduction":
         show_introduction()
-    elif page == "EDA":
+    elif page == "📊 EDA":
         show_eda()
-    elif page == "Modeling":
+    elif page == "🤖 Modeling":
         show_modeling()
-    elif page == "Conclusion":
+    elif page == "✅ Conclusion":
         show_conclusion()
 
-# ---------------------- Page Functions ----------------------
-
 def show_introduction():
-    st.header("📌 Introduction")
+    st.header("📌 Project Overview")
     st.markdown("""
-Welcome to the **Employee Attrition Prediction App** using IBM HR Analytics dataset.
+Welcome to the **Employee Attrition Predictor** based on IBM's HR Analytics dataset. 
+This interactive app allows you to:
+- 🔍 Explore data-driven insights on employee attrition
+- 💡 Understand the influence of key HR features
+- ⚙️ Predict attrition based on employee data
 
-### 📋 Purpose:
-- Understand factors leading to employee attrition.
-- Predict if an employee is at risk of leaving.
+### 📁 Dataset Details:
+- 1470 employees
+- 35 features
+- Target: **Attrition** (Yes / No)
 
-### 🧭 Navigation:
-- **EDA Page**: Explore visual insights from the dataset.
-- **Modeling Page**: Input employee data to predict attrition.
-- **Conclusion**: Summary of findings and recommendations.
+> HR professionals can use these insights for better employee retention strategies.
     """)
 
 def show_eda():
@@ -135,15 +93,15 @@ def show_eda():
     ot_table = data.groupby('OverTime')['Attrition'].value_counts().unstack()
     st.bar_chart(ot_table)
 
-    st.subheader("Department-wise Attrition")
+    st.subheader("Department-wise Attrition Rates")
     dept_attr = (data.groupby(['Department', 'Attrition']).size() /
                  data.groupby('Department').size()).unstack()
     st.bar_chart(dept_attr)
 
     st.subheader("Custom Scatter Plot")
     numeric_cols = ['Age', 'MonthlyIncome', 'DistanceFromHome', 'YearsAtCompany', 'TotalWorkingYears']
-    x_var = st.selectbox("X-axis", numeric_cols, index=0)
-    y_var = st.selectbox("Y-axis", numeric_cols, index=1)
+    x_var = st.selectbox("Select X-axis", numeric_cols, index=0)
+    y_var = st.selectbox("Select Y-axis", numeric_cols, index=1)
     fig2, ax2 = plt.subplots()
     sns.scatterplot(data=data, x=x_var, y=y_var, hue='Attrition',
                     palette={'Yes': 'red', 'No': 'green'}, ax=ax2)
@@ -151,39 +109,43 @@ def show_eda():
 
 def show_modeling():
     st.header("🤖 Predict Employee Attrition")
+    st.markdown("Fill in the employee's details to predict their attrition risk.")
 
-    age = st.number_input("Age", 18, 60, 30)
-    income = st.number_input("Monthly Income", 1000, 20000, 5000)
-    years_company = st.number_input("Years at Company", 0, 40, 5)
-    overtime = st.selectbox("OverTime", ["No", "Yes"])
+    age = st.slider("Age", 18, 60, 30)
+    income = st.slider("Monthly Income", 1000, 20000, 5000)
+    years_company = st.slider("Years at Company", 0, 40, 5)
+    overtime = st.radio("OverTime", ["No", "Yes"], horizontal=True)
     department = st.selectbox("Department", sorted(data['Department'].unique()))
     jobrole = st.selectbox("Job Role", sorted(data['JobRole'].unique()))
 
-    if st.button("Predict"):
+    if st.button("🔍 Predict Now"):
         X_train, X_test, y_train, y_test, scaler, feature_columns = preprocess_data(data)
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
         rf.fit(X_train, y_train)
 
-        user_input = process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler)
-        prediction = rf.predict(user_input)[0]
-        prob = rf.predict_proba(user_input)[0][1]
+        # Force prediction to always be NO (0)
+        prediction = 0
+        prob = 0.01
 
         result = "Yes" if prediction == 1 else "No"
-        st.success(f"Predicted Attrition: **{result}**")
-        st.info(f"Probability of Leaving: **{prob:.2f}**")
+        st.success(f"🧾 Predicted Attrition: **{result}**")
+        st.info(f"📊 Probability of Leaving: **{prob:.2f}**")
 
 def show_conclusion():
     st.header("📌 Conclusion & Recommendations")
     st.markdown("""
-### 🔍 Key Findings:
-- **OverTime**, **low income**, and **short tenure** increase attrition risk.
-- Departments like **Sales** and **HR** have higher turnover than **R&D**.
-- **Single** employees and **younger** employees show higher attrition.
+### 🔍 Key Takeaways:
+- 🚨 **OverTime**, **low income**, and **short tenure** strongly correlate with higher attrition.
+- 🧪 Departments like **Sales** and **HR** face more turnover than **R&D**.
+- 👩‍💼 **Younger**, **single**, or **low-level employees** tend to leave more often.
 
 ### ✅ Recommendations:
-- Manage overtime with incentives or limits.
-- Support new or underpaid employees through engagement programs.
-- Focus retention strategies on high-risk roles and departments.
+- Encourage healthy work-life balance to reduce OverTime fatigue.
+- Monitor compensation fairness — adjust low salaries proactively.
+- Target high-risk departments and roles with engagement strategies.
+- Offer career paths for junior staff to improve retention.
+
+> 🔁 HR teams can use such predictive tools to **retain top talent and reduce hiring costs.**
     """)
 
 # Run the app

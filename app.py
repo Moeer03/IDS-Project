@@ -1,7 +1,11 @@
+@@ -1,160 +1,164 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # Load and cache data
 @st.cache_data
@@ -10,114 +14,154 @@ def load_data():
 
 data = load_data()
 
-# -------------- Main App ----------------
+# Preprocessing function for full dataset
+def preprocess_data(df):
+    df = df.copy()
+    df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
+    df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
+    df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
+    df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
+    df = pd.get_dummies(df, drop_first=True)
 
+    y = df['Attrition']
+    X = df.drop('Attrition', axis=1)
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
+
+    return X_train, X_test, y_train, y_test, scaler, X.columns
+
+# Process a single user input row
+def process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler):
+    user_input = pd.DataFrame({
+        'Age': [age],
+        'MonthlyIncome': [income],
+        'YearsAtCompany': [years_company],
+        'OverTime': [1 if overtime == 'Yes' else 0],
+        'Department': [department],
+        'JobRole': [jobrole]
+    })
+
+    # One-hot encode
+    user_input = pd.get_dummies(user_input)
+
+    # Add any missing dummy columns
+    # Add missing columns
+    for col in feature_columns:
+        if col not in user_input.columns:
+            user_input[col] = 0
+
+    # Reorder to match training columns
+    user_input = user_input[feature_columns]
+
+    # Scale numeric columns
+    # Scale numeric columns only
+    numeric_cols = ['Age', 'MonthlyIncome', 'YearsAtCompany', 'OverTime']
+    user_input[numeric_cols] = scaler.transform(user_input[numeric_cols])
+
+    return user_input
+
+
+# Main app
 def main():
-    st.set_page_config(page_title="Employee Attrition App", layout="wide")
-    st.title("🔍 Employee Attrition Prediction & Analysis")
-    st.markdown("""
-        <style>
-            .stApp {background-color: #f8f9fa;}
-            .block-container {padding: 2rem;}
-            h1, h2, h3 {color: #2c3e50;}
-        </style>
-    """, unsafe_allow_html=True)
+    st.title("Employee Attrition Analysis and Prediction")
+    page = st.sidebar.radio("Navigate", ["Introduction", "EDA", "Modeling", "Conclusion"])
 
-    page = st.sidebar.radio("📍 Navigate", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
-
-    if page == "🏠 Introduction":
+    if page == "Introduction":
         show_introduction()
-    elif page == "📊 EDA":
+    elif page == "EDA":
         show_eda()
-    elif page == "🤖 Modeling":
+    elif page == "Modeling":
         show_modeling()
-    elif page == "✅ Conclusion":
+    elif page == "Conclusion":
         show_conclusion()
 
-# -------------- Page Functions ----------------
+# ---------------------- Page Functions ----------------------
 
 def show_introduction():
-    st.header("📌 Project Overview")
+    st.header("📌 Introduction")
     st.markdown("""
-    Welcome to the **Employee Attrition Prediction App** powered by IBM's HR Analytics dataset.
+Welcome to the **Employee Attrition Prediction App** using IBM HR Analytics dataset.
 
-    ### 🎯 Purpose:
-    - Understand what leads to employee turnover.
-    - Use visual insights for data-driven HR strategies.
-    - Predict if an employee might leave (simulated prediction for demo).
+### 📋 Purpose:
+- Understand factors leading to employee attrition.
+- Predict if an employee is at risk of leaving.
 
-    ### 📁 Dataset Snapshot:
-    - 👥 1470 Employees
-    - 🔢 35 Columns
-    - 🎯 Target: `Attrition` (Yes/No)
+### 🧭 Navigation:
+- **EDA Page**: Explore visual insights from the dataset.
+- **Modeling Page**: Input employee data to predict attrition.
+- **Conclusion**: Summary of findings and recommendations.
     """)
-    st.image("https://cdn-icons-png.flaticon.com/512/2820/2820852.png", width=120)
-    st.success("Navigate through the app using the sidebar!")
 
 def show_eda():
     st.header("📊 Exploratory Data Analysis")
 
-    st.subheader("🔸 Attrition Proportion")
+    st.subheader("Attrition Distribution")
     counts = data['Attrition'].value_counts()
     fig1, ax1 = plt.subplots()
-    ax1.pie(counts, labels=counts.index, autopct='%1.1f%%', colors=['lightgreen', 'salmon'])
+    ax1.pie(counts, labels=counts.index, autopct='%1.1f%%',
+            colors=['lightblue', 'salmon'], startangle=90)
     ax1.axis('equal')
     st.pyplot(fig1)
 
-    st.subheader("🔸 Overtime vs Attrition")
+    st.subheader("OverTime vs Attrition")
     ot_table = data.groupby('OverTime')['Attrition'].value_counts().unstack()
     st.bar_chart(ot_table)
 
-    st.subheader("🔸 Department-wise Attrition Rate")
-    dept_attr = data.groupby(['Department', 'Attrition']).size().unstack().fillna(0)
+    st.subheader("Department-wise Attrition")
+    dept_attr = (data.groupby(['Department', 'Attrition']).size() /
+                 data.groupby('Department').size()).unstack()
     st.bar_chart(dept_attr)
 
-    st.subheader("🔸 Custom Scatter Plot")
+    st.subheader("Custom Scatter Plot")
     numeric_cols = ['Age', 'MonthlyIncome', 'DistanceFromHome', 'YearsAtCompany', 'TotalWorkingYears']
-    x_var = st.selectbox("Select X-axis", numeric_cols, index=0)
-    y_var = st.selectbox("Select Y-axis", numeric_cols, index=1)
+    x_var = st.selectbox("X-axis", numeric_cols, index=0)
+    y_var = st.selectbox("Y-axis", numeric_cols, index=1)
     fig2, ax2 = plt.subplots()
-    sns.scatterplot(data=data, x=x_var, y=y_var, hue='Attrition', palette={'Yes': 'red', 'No': 'green'}, ax=ax2)
+    sns.scatterplot(data=data, x=x_var, y=y_var, hue='Attrition',
+                    palette={'Yes': 'red', 'No': 'green'}, ax=ax2)
     st.pyplot(fig2)
 
 def show_modeling():
-    st.header("🤖 Predict Employee Attrition (Demo)")
-    st.markdown("Fill in details to simulate prediction — this demo always returns 'No'.")
+    st.header("🤖 Predict Employee Attrition")
 
-    age = st.slider("🧓 Age", 18, 60, 30)
-    income = st.slider("💰 Monthly Income", 1000, 20000, 5000, step=100)
-    years_company = st.slider("🏢 Years at Company", 0, 40, 5)
-    overtime = st.radio("⏱️ OverTime", ["No", "Yes"], horizontal=True)
-    department = st.selectbox("🏬 Department", sorted(data['Department'].unique()))
-    jobrole = st.selectbox("🧑‍💼 Job Role", sorted(data['JobRole'].unique()))
+    age = st.number_input("Age", 18, 60, 30)
+    income = st.number_input("Monthly Income", 1000, 20000, 5000)
+    years_company = st.number_input("Years at Company", 0, 40, 5)
+    overtime = st.selectbox("OverTime", ["No", "Yes"])
+    department = st.selectbox("Department", sorted(data['Department'].unique()))
+    jobrole = st.selectbox("Job Role", sorted(data['JobRole'].unique()))
 
-    if st.button("🔍 Predict Now"):
-        # Simulated Output
-        result = "No"
-        prob = 0.01
+    if st.button("Predict"):
+        X_train, X_test, y_train, y_test, scaler, feature_columns = preprocess_data(data)
+        rf = RandomForestClassifier(n_estimators=100, random_state=42)
+        rf.fit(X_train, y_train)
 
-        st.success(f"🧾 Predicted Attrition: **{result}**")
-        st.info(f"📊 Simulated Probability of Leaving: **{prob:.2f}**")
-        st.warning("⚠️ Note: This is a demo. The prediction is hardcoded for project submission.")
+        user_input = process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler)
+        prediction = rf.predict(user_input)[0]
+        prob = rf.predict_proba(user_input)[0][1]
+
+        result = "Yes" if prediction == 1 else "No"
+        st.success(f"Predicted Attrition: **{result}**")
+        st.info(f"Probability of Leaving: **{prob:.2f}**")
 
 def show_conclusion():
-    st.header("📌 Conclusion & HR Recommendations")
+    st.header("📌 Conclusion & Recommendations")
     st.markdown("""
-### 🧠 Insights:
-- Overtime, lower salary, and fewer years at the company correlate with higher attrition.
-- Certain departments and job roles have more turnover.
-- Employees in early career stages are more likely to leave.
+### 🔍 Key Findings:
+- **OverTime**, **low income**, and **short tenure** increase attrition risk.
+- Departments like **Sales** and **HR** have higher turnover than **R&D**.
+- **Single** employees and **younger** employees show higher attrition.
 
-### ✅ HR Suggestions:
-- Create policies that support work-life balance.
-- Address salary gaps for at-risk employees.
-- Improve retention with career development programs.
-
-> 📈 This project demonstrates how data science supports HR in reducing employee attrition.
+### ✅ Recommendations:
+- Manage overtime with incentives or limits.
+- Support new or underpaid employees through engagement programs.
+- Focus retention strategies on high-risk roles and departments.
     """)
-    st.balloons()
 
-# -------------- Run App ----------------
-
+# Run the app
 if __name__ == "__main__":
     main()

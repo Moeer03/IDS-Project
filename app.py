@@ -13,25 +13,52 @@ def load_data():
 
 data = load_data()
 
+def process_user_input(input_data_dict, ref_columns, scaler):
+    """
+    Takes a dictionary of input fields from user,
+    returns a processed DataFrame with exact columns (ref_columns),
+    scaled and ready for prediction.
+    """
+
+    # Step 1: Convert dict to DataFrame
+    df_input = pd.DataFrame([input_data_dict])
+
+    # Step 2: One-hot encode the input
+    df_input = pd.get_dummies(df_input)
+
+    # Step 3: Add any missing columns (from training time)
+    for col in ref_columns:
+        if col not in df_input.columns:
+            df_input[col] = 0
+
+    # Step 4: Ensure column order matches training data
+    df_input = df_input[ref_columns]
+
+    # Step 5: Apply scaling to numeric columns only
+    num_cols = scaler.feature_names_in_
+    df_input[num_cols] = scaler.transform(df_input[num_cols])
+
+    return df_input
+
 # Preprocessing function for full dataset
-def preprocess_data(df):
-    df = df.copy()
-    df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
-    df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
-    df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
-    df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
-    df = pd.get_dummies(df, drop_first=True)
+# def preprocess_data(df):
+#     df = df.copy()
+#     df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
+#     df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
+#     df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
+#     df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
+#     df = pd.get_dummies(df, drop_first=True)
 
-    y = df['Attrition']
-    X = df.drop('Attrition', axis=1)
+#     y = df['Attrition']
+#     X = df.drop('Attrition', axis=1)
 
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+#     scaler = StandardScaler()
+#     X_scaled = scaler.fit_transform(X)
+#     X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
+#     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
 
-    return X_train, X_test, y_train, y_test, scaler, X.columns
+#     return X_train, X_test, y_train, y_test, scaler, X.columns
 
 # Process a single user input row
 def process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler):

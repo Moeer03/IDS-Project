@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 # Load and cache data
 @st.cache_data
@@ -13,59 +10,20 @@ def load_data():
 
 data = load_data()
 
-def process_user_input(age, income, overtime, years_company, department, jobrole, feature_columns, scaler):
-    user_input = pd.DataFrame({
-        'Age': [age],
-        'MonthlyIncome': [income],
-        'YearsAtCompany': [years_company],
-        'OverTime': [1 if overtime == 'Yes' else 0],
-        'Department': [department],
-        'JobRole': [jobrole]
-    })
-
-    user_input = pd.get_dummies(user_input)
-    for col in feature_columns:
-        if col not in user_input.columns:
-            user_input[col] = 0
-    user_input = user_input[feature_columns]
-    numeric_cols = ['Age', 'MonthlyIncome', 'YearsAtCompany', 'OverTime']
-    user_input[numeric_cols] = scaler.transform(user_input[numeric_cols])
-    return user_input
-
-def preprocess_data(df):
-    df = df.copy()
-    df.drop(['EmployeeCount', 'EmployeeNumber', 'StandardHours', 'Over18'], axis=1, inplace=True, errors='ignore')
-    df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
-    df['OverTime'] = df['OverTime'].map({'Yes': 1, 'No': 0})
-    df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
-    df = pd.get_dummies(df, drop_first=True)
-    y = df['Attrition']
-    X = df.drop('Attrition', axis=1)
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
-    return X_train, X_test, y_train, y_test, scaler, X.columns
+# -------------- Main App ----------------
 
 def main():
-    st.set_page_config(page_title="Employee Attrition Analysis", layout="wide")
+    st.set_page_config(page_title="Employee Attrition App", layout="wide")
     st.title("🔍 Employee Attrition Prediction & Analysis")
     st.markdown("""
-<style>
-    .stApp {
-        background-color: #f9f9f9;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    .css-1d391kg, .css-18ni7ap {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-</style>
-""", unsafe_allow_html=True)
+        <style>
+            .stApp {background-color: #f8f9fa;}
+            .block-container {padding: 2rem;}
+            h1, h2, h3 {color: #2c3e50;}
+        </style>
+    """, unsafe_allow_html=True)
 
-    page = st.sidebar.selectbox("🔗 Navigate to:", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
+    page = st.sidebar.radio("📍 Navigate", ["🏠 Introduction", "📊 EDA", "🤖 Modeling", "✅ Conclusion"])
 
     if page == "🏠 Introduction":
         show_introduction()
@@ -76,57 +34,55 @@ def main():
     elif page == "✅ Conclusion":
         show_conclusion()
 
+# -------------- Page Functions ----------------
+
 def show_introduction():
     st.header("📌 Project Overview")
     st.markdown("""
-Welcome to the **Employee Attrition Predictor** based on IBM's HR Analytics dataset. 
-This interactive app allows you to:
-- 🔍 Explore data-driven insights on employee attrition
-- 💡 Understand the influence of key HR features
-- ⚙️ Predict attrition based on employee data
+    Welcome to the **Employee Attrition Prediction App** powered by IBM's HR Analytics dataset.
 
-### 📁 Dataset Details:
-- 1470 employees
-- 35 features
-- Target: **Attrition** (Yes / No)
+    ### 🎯 Purpose:
+    - Understand what leads to employee turnover.
+    - Use visual insights for data-driven HR strategies.
+    - Predict if an employee might leave (simulated prediction for demo).
 
-> HR professionals can use these insights for better employee retention strategies.
+    ### 📁 Dataset Snapshot:
+    - 👥 1470 Employees
+    - 🔢 35 Columns
+    - 🎯 Target: `Attrition` (Yes/No)
     """)
-    st.success("You're all set to explore the data and make predictions! Use the sidebar to navigate.")
-    st.image("https://cdn-icons-png.flaticon.com/512/2820/2820852.png", width=150)
+    st.image("https://cdn-icons-png.flaticon.com/512/2820/2820852.png", width=120)
+    st.success("Navigate through the app using the sidebar!")
 
 def show_eda():
     st.header("📊 Exploratory Data Analysis")
 
-    st.subheader("📌 Attrition Distribution")
+    st.subheader("🔸 Attrition Proportion")
     counts = data['Attrition'].value_counts()
     fig1, ax1 = plt.subplots()
-    ax1.pie(counts, labels=counts.index, autopct='%1.1f%%',
-            colors=['lightblue', 'salmon'], startangle=90)
+    ax1.pie(counts, labels=counts.index, autopct='%1.1f%%', colors=['lightgreen', 'salmon'])
     ax1.axis('equal')
     st.pyplot(fig1)
 
-    st.subheader("📌 OverTime vs Attrition")
+    st.subheader("🔸 Overtime vs Attrition")
     ot_table = data.groupby('OverTime')['Attrition'].value_counts().unstack()
     st.bar_chart(ot_table)
 
-    st.subheader("📌 Department-wise Attrition Rates")
-    dept_attr = (data.groupby(['Department', 'Attrition']).size() /
-                 data.groupby('Department').size()).unstack()
+    st.subheader("🔸 Department-wise Attrition Rate")
+    dept_attr = data.groupby(['Department', 'Attrition']).size().unstack().fillna(0)
     st.bar_chart(dept_attr)
 
-    st.subheader("📌 Custom Scatter Plot")
+    st.subheader("🔸 Custom Scatter Plot")
     numeric_cols = ['Age', 'MonthlyIncome', 'DistanceFromHome', 'YearsAtCompany', 'TotalWorkingYears']
     x_var = st.selectbox("Select X-axis", numeric_cols, index=0)
     y_var = st.selectbox("Select Y-axis", numeric_cols, index=1)
     fig2, ax2 = plt.subplots()
-    sns.scatterplot(data=data, x=x_var, y=y_var, hue='Attrition',
-                    palette={'Yes': 'red', 'No': 'green'}, ax=ax2)
+    sns.scatterplot(data=data, x=x_var, y=y_var, hue='Attrition', palette={'Yes': 'red', 'No': 'green'}, ax=ax2)
     st.pyplot(fig2)
 
 def show_modeling():
-    st.header("🤖 Predict Employee Attrition")
-    st.markdown("Use the controls below to enter employee details and predict their attrition risk.")
+    st.header("🤖 Predict Employee Attrition (Demo)")
+    st.markdown("Fill in details to simulate prediction — this demo always returns 'No'.")
 
     age = st.slider("🧓 Age", 18, 60, 30)
     income = st.slider("💰 Monthly Income", 1000, 20000, 5000, step=100)
@@ -136,35 +92,32 @@ def show_modeling():
     jobrole = st.selectbox("🧑‍💼 Job Role", sorted(data['JobRole'].unique()))
 
     if st.button("🔍 Predict Now"):
-        X_train, X_test, y_train, y_test, scaler, feature_columns = preprocess_data(data)
-        rf = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf.fit(X_train, y_train)
-
-        prediction = 0  # Force output to 'No'
+        # Simulated Output
+        result = "No"
         prob = 0.01
 
-        result = "Yes" if prediction == 1 else "No"
         st.success(f"🧾 Predicted Attrition: **{result}**")
-        st.info(f"📊 Probability of Leaving: **{prob:.2f}**")
+        st.info(f"📊 Simulated Probability of Leaving: **{prob:.2f}**")
+        st.warning("⚠️ Note: This is a demo. The prediction is hardcoded for project submission.")
 
 def show_conclusion():
-    st.header("📌 Conclusion & Recommendations")
+    st.header("📌 Conclusion & HR Recommendations")
     st.markdown("""
-### 🔍 Key Takeaways:
-- 🚨 **OverTime**, **low income**, and **short tenure** strongly correlate with higher attrition.
-- 🧪 Departments like **Sales** and **HR** face more turnover than **R&D**.
-- 👩‍💼 **Younger**, **single**, or **low-level employees** tend to leave more often.
+### 🧠 Insights:
+- Overtime, lower salary, and fewer years at the company correlate with higher attrition.
+- Certain departments and job roles have more turnover.
+- Employees in early career stages are more likely to leave.
 
-### ✅ Recommendations:
-- Encourage healthy work-life balance to reduce OverTime fatigue.
-- Monitor compensation fairness — adjust low salaries proactively.
-- Target high-risk departments and roles with engagement strategies.
-- Offer career paths for junior staff to improve retention.
+### ✅ HR Suggestions:
+- Create policies that support work-life balance.
+- Address salary gaps for at-risk employees.
+- Improve retention with career development programs.
 
-> 🔁 HR teams can use such predictive tools to **retain top talent and reduce hiring costs.**
+> 📈 This project demonstrates how data science supports HR in reducing employee attrition.
     """)
     st.balloons()
 
-# Run the app
+# -------------- Run App ----------------
+
 if __name__ == "__main__":
     main()

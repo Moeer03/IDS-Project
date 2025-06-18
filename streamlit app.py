@@ -1,4 +1,4 @@
-import streamlit as stMore actions
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -47,22 +47,16 @@ def process_user_input(age, income, overtime, years_company, department, jobrole
     # One-hot encode
     user_input = pd.get_dummies(user_input)
 
-    # Add any missing dummy columns
-    # Add missing columns
     for col in feature_columns:
         if col not in user_input.columns:
             user_input[col] = 0
 
-    # Reorder to match training columns
     user_input = user_input[feature_columns]
 
-    # Scale numeric columns
-    # Scale numeric columns only
     numeric_cols = ['Age', 'MonthlyIncome', 'YearsAtCompany', 'OverTime']
     user_input[numeric_cols] = scaler.transform(user_input[numeric_cols])
 
     return user_input
-
 
 # Main app
 def main():
@@ -81,57 +75,54 @@ def main():
 # ---------------------- Page Functions ----------------------
 
 def show_introduction():
-    st.header("📌 Welcome to the Employee Attrition Prediction App")
-
+    st.header("Welcome to the Employee Attrition Prediction App")
     st.markdown("""
-    Welcome to the **Employee Attrition Prediction App** powered by *IBM HR Analytics* dataset.  
-    This interactive tool allows you to explore employee trends and predict the likelihood of attrition using real-world HR data.
-    
-    ---
-    
-    ### 🎯 **Project Objectives**
-    - 🔍 **Analyze**: Explore patterns and trends in employee attrition using interactive visualizations.
-    - 📊 **Model**: Use machine learning to predict whether an employee is likely to leave.
-    - 💡 **Interpret**: Gain actionable insights to help HR departments retain talent.
-    
-    ---
-    
-    ### 📚 **Dataset Overview**
-    - Based on the **IBM HR Analytics Employee Attrition & Performance** dataset.
-    - Contains information on age, income, job roles, departments, work-life balance, overtime, and more.
-    - A valuable resource to understand why employees leave organizations.
-    
-    ---
-    
-    ### 🧭 **App Navigation**
-    Use the left-hand sidebar to explore the different sections of this app:
-    
-    - 🧮 **EDA (Exploratory Data Analysis)**  
-      Discover patterns through visual charts and statistical summaries.
-    
-    - 🤖 **Modeling**  
-      Input employee details and receive a predictive result for attrition risk.
-    
-    - 📌 **Conclusion**  
-      View the overall analysis summary and strategic HR recommendations.
-    
-    ---
-    
-    ### ✅ **Why This App Matters**
-    Understanding employee attrition is crucial for:
-    - Enhancing employee retention
-    - Improving organizational culture
-    - Reducing hiring and training costs
-    
-    ---
-    
-    👨‍💼 Whether you're an HR professional, data analyst, or business leader — this app empowers you to make smarter, data-driven decisions.
-    
-    ---
-        """)
+Welcome to the Employee Attrition Prediction App powered by IBM HR Analytics dataset.  
+This interactive tool allows you to explore employee trends and predict the likelihood of attrition using real-world HR data.
+
+---
+
+### Project Objectives
+- Analyze: Explore patterns and trends in employee attrition using interactive visualizations.
+- Model: Use machine learning to predict whether an employee is likely to leave.
+- Interpret: Gain actionable insights to help HR departments retain talent.
+
+---
+
+### Dataset Overview
+- Based on the IBM HR Analytics Employee Attrition & Performance dataset.
+- Contains information on age, income, job roles, departments, work-life balance, overtime, and more.
+- A valuable resource to understand why employees leave organizations.
+
+---
+
+### App Navigation
+Use the left-hand sidebar to explore the different sections of this app:
+
+- EDA (Exploratory Data Analysis)  
+  Discover patterns through visual charts and statistical summaries.
+
+- Modeling  
+  Input employee details and receive a predictive result for attrition risk.
+
+- Conclusion  
+  View the overall analysis summary and strategic HR recommendations.
+
+---
+
+### Why This App Matters
+Understanding employee attrition is crucial for:
+- Enhancing employee retention
+- Improving organizational culture
+- Reducing hiring and training costs
+
+---
+
+Whether you're an HR professional, data analyst, or business leader — this app empowers you to make smarter, data-driven decisions.
+    """)
 
 def show_eda():
-    st.header("📊 Exploratory Data Analysis")
+    st.header("Exploratory Data Analysis")
 
     st.subheader("Attrition Distribution")
     counts = data['Attrition'].value_counts()
@@ -160,7 +151,7 @@ def show_eda():
     st.pyplot(fig2)
 
 def show_modeling():
-    st.header("🤖 Predict Employee Attrition")
+    st.header("Predict Employee Attrition")
 
     age = st.number_input("Age", 18, 60, 30)
     income = st.number_input("Monthly Income", 1000, 20000, 5000)
@@ -181,71 +172,51 @@ def show_modeling():
         st.info(f"Probability of Leaving: **{prob:.2f}**")
 
 def show_conclusion():
-    st.header("📌 Conclusion & Recommendations")
-    st.header("📌 Conclusion & Strategic Recommendations")
-
+    st.header("Conclusion and Recommendations")
     st.markdown("""
-### 🔍 Key Findings:
-- **OverTime**, **low income**, and **short tenure** increase attrition risk.
-- Departments like **Sales** and **HR** have higher turnover than **R&D**.
-- **Single** employees and **younger** employees show higher attrition.
+### Key Findings
+- OverTime, low income, and short tenure increase attrition risk.
+- Departments like Sales and HR have higher turnover than R&D.
+- Single employees and younger employees show higher attrition.
 
-### ✅ Recommendations:
-- Manage overtime with incentives or limits.
-- Support new or underpaid employees through engagement programs.
-- Focus retention strategies on high-risk roles and departments.
+---
+
+### Strategic Recommendations
+
+- Optimize Workload  
+  Implement balanced scheduling and offer compensation or time-off for overtime work.
+
+- Improve Compensation Strategies  
+  Regular salary reviews and performance-based incentives can reduce dissatisfaction.
+
+- New Employee Engagement  
+  Onboard new hires with mentoring, career growth plans, and early recognition programs.
+
+- Department-Specific Initiatives  
+  Design targeted retention programs for Sales and HR where turnover is highest.
+
+- Use Predictive Analytics in HR  
+  Leverage machine learning to identify high-risk employees proactively.
+
+- Promote Work-Life Balance  
+  Encourage flexible hours and wellness programs to enhance employee satisfaction.
+
+---
+
+### Final Thoughts
+
+Understanding the "why" behind attrition helps organizations:
+- Retain top talent
+- Reduce hiring/training costs
+- Foster a positive, productive work culture
+
+This app is just the beginning — integrate its insights into your HR strategy to drive meaningful change.
+
+---
+
+Thank you for exploring the app.  
+Use the sidebar to revisit any section or test predictions again.
     """)
-    ---
-    
-    ### 🔍 **Key Findings from Analysis**
-    -  **OverTime**: Employees working overtime are significantly more likely to leave.
-    - 💰 **Low Monthly Income**: Attrition risk is higher among employees earning under \$10,000.
-    - ⏳ **Short Tenure**: Employees with less than 5 years at the company show increased turnover.
-    - 🏢 **Department Differences**: Departments like **Sales** and **HR** see higher attrition than **R&D**.
-    - 🧑‍💼 **Demographic Trends**:
-      - 👶 Younger employees (< 30) are more likely to leave.
-      - ❤️ Single employees have a higher attrition rate compared to married employees.
-      - 🎓 Lower education levels correlate with slightly higher turnover.
-    
-    ---
-    
-    ### ✅ **Strategic Recommendations**
-    
-    - ⚖️ **Optimize Workload**  
-      Implement balanced scheduling and offer compensation or time-off for overtime work.
-    
-    - 💸 **Improve Compensation Strategies**  
-      Regular salary reviews and performance-based incentives can reduce dissatisfaction.
-    
-    - 👥 **New Employee Engagement**  
-      Onboard new hires with mentoring, career growth plans, and early recognition programs.
-    
-    - 🧭 **Department-Specific Initiatives**  
-      Design targeted retention programs for **Sales** and **HR** where turnover is highest.
-    
-    - 📊 **Use Predictive Analytics in HR**  
-      Leverage machine learning to identify high-risk employees proactively.
-    
-    - 🧘 **Promote Work-Life Balance**  
-      Encourage flexible hours and wellness programs to enhance employee satisfaction.
-    
-    ---
-    
-    ### 🌟 **Final Thoughts**
-    
-    Understanding the **"why"** behind attrition helps organizations:
-    - Retain top talent 🎯
-    - Reduce hiring/training costs 💼
-    - Foster a positive, productive work culture 🌿
-    
-    This app is just the beginning — integrate its insights into your HR strategy to drive meaningful change.
-    
-    ---
-    
-    👉 *Thank you for exploring the app!*  
-    Use the sidebar to revisit any section or test predictions again.
-        """)
-    
 
 # Run the app
 if __name__ == "__main__":

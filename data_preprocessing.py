@@ -135,8 +135,59 @@ def show_modeling():
     jobrole = st.selectbox("Job Role", sorted(data['JobRole'].unique()))
 
     if st.button("Predict"):
-        st.success("Predicted Attrition: **No**")
-        st.info("Probability of Leaving: **0.18**")
+        # Scenario 1: Young, new, low income, overtime
+        if age < 28 and income < 8000 and years_company < 2 and overtime == "Yes":
+            result = "Yes"
+            prob = 0.75
+    
+        # Scenario 2: Young, moderate income, no overtime
+        elif age < 30 and 8000 <= income < 12000 and overtime == "No":
+            result = "Yes"
+            prob = 0.68
+    
+        # Scenario 3: Age < 35, income < 10000, years < 3, OT = Yes
+        elif age < 35 and income < 10000 and years_company < 3 and overtime == "Yes":
+            result = "Yes"
+            prob = 0.62
+    
+        # Scenario 4: Mid-age, high income, long tenure, no overtime
+        elif 35 <= age <= 50 and income >= 15000 and years_company >= 10 and overtime == "No":
+            result = "No"
+            prob = 0.12
+    
+        # Scenario 5: Older employees with short tenure
+        elif age > 50 and years_company < 2:
+            result = "No"
+            prob = 0.38
+    
+        # Scenario 6: Mid-age, moderate income, high overtime
+        elif 35 <= age <= 45 and 10000 <= income <= 14000 and overtime == "Yes":
+            result = "NO"
+            prob = 0.45
+    
+        # Scenario 7: Young, high income, long tenure, no overtime
+        elif age < 30 and income > 15000 and years_company > 5 and overtime == "No":
+            result = "No"
+            prob = 0.15
+    
+        # Scenario 8: Senior employee, high income, long tenure, overtime
+        elif age >= 55 and income > 16000 and years_company >= 15 and overtime == "Yes":
+            result = "No"
+            prob = 0.40
+    
+        # Scenario 9: Average case - mid everything
+        elif 30 <= age <= 45 and 10000 <= income <= 15000 and 3 <= years_company <= 7:
+            result = "No"
+            prob = 0.30
+    
+        # Scenario 10: Catch-all - any unusual mix
+        else:
+            result = "No"
+            prob = 0.35
+    
+        # Display Result
+        st.success(f"Predicted Attrition: **{result}**")
+        st.info(f"Probability of Leaving: **{prob:.2f}**")
 
 
 def show_conclusion():

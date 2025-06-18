@@ -181,18 +181,60 @@ def show_modeling():
         st.info(f"Probability of Leaving: **{prob:.2f}**")
 
 def show_conclusion():
-    st.header("📌 Conclusion & Recommendations")
-    st.markdown("""
-### 🔍 Key Findings:
-- **OverTime**, **low income**, and **short tenure** increase attrition risk.
-- Departments like **Sales** and **HR** have higher turnover than **R&D**.
-- **Single** employees and **younger** employees show higher attrition.
+    st.header("📌 Conclusion & Strategic Recommendations")
 
-### ✅ Recommendations:
-- Manage overtime with incentives or limits.
-- Support new or underpaid employees through engagement programs.
-- Focus retention strategies on high-risk roles and departments.
-    """)
+    st.markdown("""
+    ---
+    
+    ### 🔍 **Key Findings from Analysis**
+    - 🕒 **OverTime**: Employees working overtime are significantly more likely to leave.
+    - 💰 **Low Monthly Income**: Attrition risk is higher among employees earning under \$10,000.
+    - ⏳ **Short Tenure**: Employees with less than 5 years at the company show increased turnover.
+    - 🏢 **Department Differences**: Departments like **Sales** and **HR** see higher attrition than **R&D**.
+    - 🧑‍💼 **Demographic Trends**:
+      - 👶 Younger employees (< 30) are more likely to leave.
+      - ❤️ Single employees have a higher attrition rate compared to married employees.
+      - 🎓 Lower education levels correlate with slightly higher turnover.
+    
+    ---
+    
+    ### ✅ **Strategic Recommendations**
+    
+    - ⚖️ **Optimize Workload**  
+      Implement balanced scheduling and offer compensation or time-off for overtime work.
+    
+    - 💸 **Improve Compensation Strategies**  
+      Regular salary reviews and performance-based incentives can reduce dissatisfaction.
+    
+    - 👥 **New Employee Engagement**  
+      Onboard new hires with mentoring, career growth plans, and early recognition programs.
+    
+    - 🧭 **Department-Specific Initiatives**  
+      Design targeted retention programs for **Sales** and **HR** where turnover is highest.
+    
+    - 📊 **Use Predictive Analytics in HR**  
+      Leverage machine learning to identify high-risk employees proactively.
+    
+    - 🧘 **Promote Work-Life Balance**  
+      Encourage flexible hours and wellness programs to enhance employee satisfaction.
+    
+    ---
+    
+    ### 🌟 **Final Thoughts**
+    
+    Understanding the **"why"** behind attrition helps organizations:
+    - Retain top talent 🎯
+    - Reduce hiring/training costs 💼
+    - Foster a positive, productive work culture 🌿
+    
+    This app is just the beginning — integrate its insights into your HR strategy to drive meaningful change.
+    
+    ---
+    
+    👉 *Thank you for exploring the app!*  
+    Use the sidebar to revisit any section or test predictions again.
+        """)
+    
 
 # Run the app
 if __name__ == "__main__":

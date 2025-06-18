@@ -198,7 +198,7 @@ def show_conclusion():
     ---
     
     ### 🔍 **Key Findings from Analysis**
-    - 🕒 **OverTime**: Employees working overtime are significantly more likely to leave.
+    -  **OverTime**: Employees working overtime are significantly more likely to leave.
     - 💰 **Low Monthly Income**: Attrition risk is higher among employees earning under \$10,000.
     - ⏳ **Short Tenure**: Employees with less than 5 years at the company show increased turnover.
     - 🏢 **Department Differences**: Departments like **Sales** and **HR** see higher attrition than **R&D**.

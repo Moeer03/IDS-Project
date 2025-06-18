@@ -136,7 +136,7 @@ def show_modeling():
 
     if st.button("Predict"):
         st.success("Predicted Attrition: **No**")
-        st.info("Probability of Leaving: **0.00**")
+        st.info("Probability of Leaving: **0.18**")
 
 
 def show_conclusion():

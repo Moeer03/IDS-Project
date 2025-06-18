@@ -81,19 +81,54 @@ def main():
 # ---------------------- Page Functions ----------------------
 
 def show_introduction():
-    st.header("📌 Introduction")
+    st.header("📌 Welcome to the Employee Attrition Prediction App")
+    
     st.markdown("""
-Welcome to the **Employee Attrition Prediction App** using IBM HR Analytics dataset.
-
-### 📋 Purpose:
-- Understand factors leading to employee attrition.
-- Predict if an employee is at risk of leaving.
-
-### 🧭 Navigation:
-- **EDA Page**: Explore visual insights from the dataset.
-- **Modeling Page**: Input employee data to predict attrition.
-- **Conclusion**: Summary of findings and recommendations.
-    """)
+    Welcome to the **Employee Attrition Prediction App** powered by *IBM HR Analytics* dataset.  
+    This interactive tool allows you to explore employee trends and predict the likelihood of attrition using real-world HR data.
+    
+    ---
+    
+    ### 🎯 **Project Objectives**
+    - 🔍 **Analyze**: Explore patterns and trends in employee attrition using interactive visualizations.
+    - 📊 **Model**: Use machine learning to predict whether an employee is likely to leave.
+    - 💡 **Interpret**: Gain actionable insights to help HR departments retain talent.
+    
+    ---
+    
+    ### 📚 **Dataset Overview**
+    - Based on the **IBM HR Analytics Employee Attrition & Performance** dataset.
+    - Contains information on age, income, job roles, departments, work-life balance, overtime, and more.
+    - A valuable resource to understand why employees leave organizations.
+    
+    ---
+    
+    ### 🧭 **App Navigation**
+    Use the left-hand sidebar to explore the different sections of this app:
+    
+    - 🧮 **EDA (Exploratory Data Analysis)**  
+      Discover patterns through visual charts and statistical summaries.
+    
+    - 🤖 **Modeling**  
+      Input employee details and receive a predictive result for attrition risk.
+    
+    - 📌 **Conclusion**  
+      View the overall analysis summary and strategic HR recommendations.
+    
+    ---
+    
+    ### ✅ **Why This App Matters**
+    Understanding employee attrition is crucial for:
+    - Enhancing employee retention
+    - Improving organizational culture
+    - Reducing hiring and training costs
+    
+    ---
+    
+    👨‍💼 Whether you're an HR professional, data analyst, or business leader — this app empowers you to make smarter, data-driven decisions.
+    
+    ---
+        """)
 
 def show_eda():
     st.header("📊 Exploratory Data Analysis")
